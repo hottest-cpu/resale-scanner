@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Resale Scanner - Find Profitable Items to Flip</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 0;
+      color: #333;
+    }
+
+    .navbar {
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 15px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .navbar-content {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .logo {
+      font-size: 1.8em;
+      font-weight: 700;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .stats {
+      display: flex;
+      gap: 30px;
+      font-size: 0.95em;
+    }
+
+    .stat-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .stat-value {
+      font-weight: 700;
+      color: #667eea;
+      font-size: 1.3em;
+    }
+
+    .stat-label {
+      color: #999;
+      font-size: 0.85em;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 0 20px;
+    }
+
+    header {
+      text-align: center;
+      color: white;
+      padding: 40px 20px;
+    }
+
+    h1 {
+      font-size: 3em;
+      margin-bottom: 15px;
+      font-weight: 800;
+      text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
+      animation: fadeInDown 0.6s ease-out;
+    }
+
+    .subtitle {
+      font-size: 1.2em;
+      opacity: 0.95;
+      margin-bottom: 30px;
+      animation: fadeInUp 0.6s ease-out 0.1s both;
+    }
+
+    .search-section {
+      background: white;
+      padding: 35px;
+      border-radius: 15px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      margin-bottom: 50px;
+      animation: fadeInUp 0.6s ease-out 0.2s both;
+    }
+
+    .search-inputs {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr 1fr 150px;
+      gap: 15px;
+      margin-bottom: 0;
+    }
+
+    input {
+      padding: 14px 18px;
+      border: 2px solid #e8e8e8;
+      border-radius: 8px;
+      font-size: 1em;
+      transition: all 0.3s;
+      background: #f8f9fa;
+    }
+
+    input:focus {
+      outline: none;
+      border-color: #667eea;
+      background: white;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    input::placeholder {
+      color: #bbb;
+    }
+
+    button {
+      padding: 14px 30px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    button:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+    }
+
+    button:active {
+      transform: translateY(-1px);
+    }
+
+    .listings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 25px;
+      margin-bottom: 50px;
+      animation: fadeIn 0.6s ease-out 0.3s both;
+    }
+
+    .listing-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      cursor: pointer;
+      will-change: transform, box-shadow;
+    }
+
+    .listing-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .card-header {
+      padding: 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      flex-shrink: 0;
+    }
+
+    .card-header h3 {
+      margin-bottom: 10px;
+      font-size: 1.15em;
+      line-height: 1.4;
+      font-weight: 700;
+    }
+
+    .platform-tag {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.25);
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 0.8em;
+      font-weight: 600;
+      backdrop-filter: blur(10px);
+    }
+
+    .card-body {
+      padding: 20px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .price-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .price-item {
+      background: linear-gradient(135deg, #f5f7ff 0%, #f0f4ff 100%);
+      padding: 14px;
+      border-radius: 8px;
+      border-left: 3px solid #667eea;
+    }
+
+    .price-label {
+      font-size: 0.85em;
+      color: #666;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .price-value {
+      font-size: 1.3em;
+      font-weight: 700;
+      color: #667eea;
+    }
+
+    .description {
+      color: #666;
+      margin-bottom: 18px;
+      font-size: 0.95em;
+      line-height: 1.5;
+      flex-grow: 1;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: auto;
+    }
+
+    .analyze-btn {
+      flex: 1;
+      padding: 12px 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 0.95em;
+      font-weight: 600;
+      transition: all 0.3s;
+      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .analyze-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .view-link {
+      flex: 1;
+      text-align: center;
+      color: #667eea;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 12px 16px;
+      border: 2px solid #667eea;
+      border-radius: 8px;
+      transition: all 0.3s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .view-link:hover {
+      background: #667eea;
+      color: white;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(5px);
+      z-index: 2000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      animation: fadeIn 0.3s ease-out;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 40px;
+      border-radius: 15px;
+      max-width: 550px;
+      width: 100%;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      animation: slideUp 0.3s ease-out;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .modal-header {
+      font-size: 1.6em;
+      font-weight: 700;
+      margin-bottom: 25px;
+      color: #333;
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+    }
+
+    .close-btn {
+      background: none;
+      border: none;
+      font-size: 1.8em;
+      cursor: pointer;
+      color: #999;
+      padding: 0;
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s;
+    }
+
+    .close-btn:hover {
+      color: #333;
+      transform: rotate(90deg);
+    }
+
+    .analysis-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .analysis-item:last-of-type {
+      border-bottom: none;
+    }
+
+    .analysis-label {
+      color: #666;
+      font-weight: 500;
+    }
+
+    .analysis-value {
+      font-weight: 700;
+      color: #667eea;
+      font-size: 1.1em;
+    }
+
+    .profit-highlight {
+      background: linear-gradient(135deg, #f0f4ff 0%, #e8ecff 100%);
+      padding: 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      border-left: 4px solid #667eea;
+    }
+
+    .profit-highlight .analysis-item {
+      border-bottom: none;
+      padding: 8px 0;
+    }
+
+    .profit-highlight .analysis-label {
+      font-weight: 600;
+      color: #333;
+    }
+
+    .profit-highlight .analysis-value {
+      font-size: 1.4em;
+    }
+
+    .recommendation {
+      margin-top: 20px;
+      padding: 18px;
+      border-radius: 10px;
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.2em;
+      animation: slideUp 0.3s ease-out;
+    }
+
+    .recommendation.buy {
+      background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
+      color: #155724;
+      border: 2px solid #28a745;
+      box-shadow: 0 4px 15px rgba(40, 167, 69, 0.2);
+    }
+
+    .recommendation.maybe {
+      background: linear-gradient(135deg, #fff3cd 0%, #ffeeba 100%);
+      color: #856404;
+      border: 2px solid #ffc107;
+      box-shadow: 0 4px 15px rgba(255, 193, 7, 0.2);
+    }
+
+    .recommendation.pass {
+      background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
+      color: #721c24;
+      border: 2px solid #f5c6cb;
+      box-shadow: 0 4px 15px rgba(245, 198, 203, 0.2);
+    }
+
+    .loading {
+      text-align: center;
+      color: white;
+      font-size: 1.2em;
+      padding: 60px 20px;
+    }
+
+    .spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid white;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+      to {
+        opacity: 1;
+      }
+    }
+
+    @keyframes fadeInDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .no-results {
+      text-align: center;
+      padding: 60px 20px;
+      color: white;
+    }
+
+    .no-results h2 {
+      font-size: 1.8em;
+      margin-bottom: 10px;
+    }
+
+    .no-results p {
+      font-size: 1.1em;
+      opacity: 0.9;
+    }
+
+    @media (max-width: 1024px) {
+      .search-inputs {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      h1 {
+        font-size: 2.2em;
+      }
+
+      .stats {
+        gap: 15px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .navbar {
+        padding: 12px 0;
+      }
+
+      .navbar-content {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .search-inputs {
+        grid-template-columns: 1fr;
+      }
+
+      h1 {
+        font-size: 1.8em;
+      }
+
+      .subtitle {
+        font-size: 1em;
+      }
+
+      .search-section {
+        padding: 20px;
+      }
+
+      .listings-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .modal-content {
+        padding: 25px;
+      }
+
+      .stats {
+        font-size: 0.85em;
+        gap: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="navbar">
+    <div class="navbar-content">
+      <div class="logo">🛒 Resale Scanner</div>
+      <div class="stats">
+        <div class="stat-item">
+          <div class="stat-value" id="totalItems">10</div>
+          <div class="stat-label">Listings</div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-value" id="avgProfit">$45</div>
+          <div class="stat-label">Avg Profit</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="container">
+    <header>
+      <h1>🚀 Find Profitable Deals</h1>
+      <p class="subtitle">Scan Facebook Marketplace & Craigslist for items to flip</p>
+    </header>
+
+    <div class="search-section">
+      <div class="search-inputs">
+        <input type="text" id="searchInput" placeholder="Search (camera, vintage, electronics...)">
+        <input type="text" id="locationInput" placeholder="Location">
+        <input type="number" id="maxPriceInput" placeholder="Max price">
+        <button onclick="searchListings()">Search</button>
+      </div>
+    </div>
+
+    <div class="listings-grid" id="listingsGrid"></div>
+    <div id="noResults" class="no-results" style="display: none;">
+      <h2>No listings found</h2>
+      <p>Try adjusting your search filters</p>
+    </div>
+  </div>
+
+  <!-- Modal for profit analysis -->
+  <div class="modal" id="analysisModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div id="modalTitle">Profit Analysis</div>
+        <button class="close-btn" onclick="closeModal()">×</button>
+      </div>
+      <div id="analysisContent"></div>
+    </div>
+  </div>
+
+  <script>
+    let allListings = [];
+
+    // Load listings on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      loadListings();
+    });
+
+    async function loadListings() {
+      try {
+        const response = await fetch('/api/listings');
+        allListings = await response.json();
+        displayListings(allListings);
+        updateStats();
+      } catch (error) {
+        console.error('Error loading listings:', error);
+      }
+    }
+
+    function displayListings(listings) {
+      const grid = document.getElementById('listingsGrid');
+      const noResults = document.getElementById('noResults');
+
+      if (listings.length === 0) {
+        grid.innerHTML = '';
+        noResults.style.display = 'block';
+        return;
+      }
+
+      noResults.style.display = 'none';
+      grid.innerHTML = '';
+
+      listings.forEach((listing, index) => {
+        const card = document.createElement('div');
+        card.className = 'listing-card';
+        card.style.animationDelay = `${index * 0.05}s`;
+        card.innerHTML = `
+          <div class="card-header">
+            <h3>${listing.title}</h3>
+            <span class="platform-tag">${listing.platform}</span>
+          </div>
+          <div class="card-body">
+            <div class="price-info">
+              <div class="price-item">
+                <div class="price-label">💰 Buy</div>
+                <div class="price-value">$${listing.price}</div>
+              </div>
+              <div class="price-item">
+                <div class="price-label">📍 ${listing.location}</div>
+              </div>
+            </div>
+            <p class="description">${listing.description}</p>
+            <div class="card-actions">
+              <button class="analyze-btn" onclick="analyzeProfit(${listing.id})">📊 Analyze</button>
+              <a href="${listing.url}" target="_blank" class="view-link">View →</a>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    async function analyzeProfit(listingId) {
+      const listing = allListings.find(l => l.id === listingId);
+      
+      try {
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ listing })
+        });
+        const analysis = await response.json();
+        showAnalysisModal(listing, analysis);
+      } catch (error) {
+        console.error('Error analyzing profit:', error);
+      }
+    }
+
+    function showAnalysisModal(listing, analysis) {
+      const modal = document.getElementById('analysisModal');
+      const modalTitle = document.getElementById('modalTitle');
+      const content = document.getElementById('analysisContent');
+
+      modalTitle.textContent = listing.title;
+
+      const recommendationClass = analysis.recommendation.toLowerCase();
+      const recommendationEmoji = {
+        'buy': '✅',
+        'maybe': '⚠️',
+        'pass': '❌'
+      }[recommendationClass];
+
+      content.innerHTML = `
+        <div class="analysis-item">
+          <span class="analysis-label">💵 Purchase Price</span>
+          <span class="analysis-value">$${analysis.purchasePrice}</span>
+        </div>
+        <div class="analysis-item">
+          <span class="analysis-label">📈 Resale Estimate</span>
+          <span class="analysis-value">$${analysis.estimatedResale}</span>
+        </div>
+        <div class="analysis-item">
+          <span class="analysis-label">📊 Multiplier</span>
+          <span class="analysis-value">${(analysis.estimatedResale / analysis.purchasePrice).toFixed(2)}x</span>
+        </div>
+        
+        <div class="profit-highlight">
+          <div class="analysis-item">
+            <span class="analysis-label">🏪 Platform Fee</span>
+            <span class="analysis-value">-$${analysis.platformFee}</span>
+          </div>
+          <div class="analysis-item">
+            <span class="analysis-label">📦 Shipping</span>
+            <span class="analysis-value">-$${analysis.shippingCost}</span>
+          </div>
+          <div class="analysis-item">
+            <span class="analysis-label">💰 Net Profit</span>
+            <span class="analysis-value">$${analysis.netProfit}</span>
+          </div>
+          <div class="analysis-item">
+            <span class="analysis-label">📊 Margin</span>
+            <span class="analysis-value">${analysis.profitMargin}%</span>
+          </div>
+        </div>
+
+        <div class="analysis-item">
+          <span class="analysis-label">📂 Category</span>
+          <span class="analysis-value">${analysis.category}</span>
+        </div>
+        
+        <div class="recommendation ${recommendationClass}">
+          ${recommendationEmoji} ${analysis.recommendation}
+        </div>
+      `;
+
+      modal.classList.add('active');
+    }
+
+    function closeModal() {
+      document.getElementById('analysisModal').classList.remove('active');
+    }
+
+    function updateStats() {
+      document.getElementById('totalItems').textContent = allListings.length;
+      
+      // Calculate average profit potential
+      let totalProfit = 0;
+      allListings.forEach(listing => {
+        const category = detectCategory(listing.title);
+        const multiplier = {
+          'camera': 3.5, 'watch': 3.0, 'electronics': 2.5, 'furniture': 2.0,
+          'headphones': 2.3, 'laptop': 2.2, 'console': 2.4, 'vacuum': 1.8,
+          'sofa': 1.6, 'other': 1.5
+        }[category] || 1.5;
+        
+        const estimatedResale = listing.price * multiplier;
+        const platformFee = estimatedResale * 0.125;
+        const netProfit = estimatedResale - listing.price - platformFee - 8;
+        totalProfit += netProfit;
+      });
+      
+      document.getElementById('avgProfit').textContent = '$' + Math.round(totalProfit / allListings.length);
+    }
+
+    function detectCategory(title) {
+      const categories = ['camera', 'watch', 'electronics', 'furniture', 'headphones', 'laptop', 'console', 'vacuum', 'sofa'];
+      const titleLower = title.toLowerCase();
+      for (const cat of categories) {
+        if (titleLower.includes(cat)) return cat;
+      }
+      return 'other';
+    }
+
+    function searchListings() {
+      const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+      const location = document.getElementById('locationInput').value.toLowerCase();
+      const maxPrice = parseFloat(document.getElementById('maxPriceInput').value) || Infinity;
+
+      const filtered = allListings.filter(listing => {
+        const matchesSearch = !searchTerm || 
+          listing.title.toLowerCase().includes(searchTerm) || 
+          listing.description.toLowerCase().includes(searchTerm);
+        
+        const matchesLocation = !location || listing.location.toLowerCase().includes(location);
+        const matchesPrice = listing.price <= maxPrice;
+
+        return matchesSearch && matchesLocation && matchesPrice;
+      });
+
+      displayListings(filtered);
+    }
+
+    // Close modal when clicking outside
+    document.getElementById('analysisModal').addEventListener('click', (e) => {
+      if (e.target.id === 'analysisModal') closeModal();
+    });
+
+    // Search on Enter key
+    document.getElementById('searchInput').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') searchListings();
+    });
+  </script>
+</body>
+</html>
